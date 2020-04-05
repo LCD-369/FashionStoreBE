@@ -13,6 +13,7 @@ const tableName = 'FashionrusStore';
 const indexName = 'SK-index';
 docClient = new AWS.DynamoDB.DocumentClient();
 
+
 //Find all products
 router.get('/api/products', (req, res, next) => {
 
@@ -39,12 +40,11 @@ router.get('/api/products', (req, res, next) => {
 });
 
 //Find products by gender
-router.get('/api/products/:GENDER', (req, res, next) => {
+router.get('/api/products/gender/:GENDER', (req, res, next) => {
   let gender = req.params.GENDER;
   let product = 'PRODUCT';
   let params = {
     TableName: tableName,
-    ScanIndexForward: false,
     IndexName: indexName,
     KeyConditionExpression: 'SK = :SK',
     FilterExpression: 'GENDER = :GENDER',
@@ -63,8 +63,8 @@ router.get('/api/products/:GENDER', (req, res, next) => {
         status: err.statusCode
       });
     } else {
-      if (!_.isEmpty(data.Items)) {
-        return res.status(200).send(data.Items[0]);
+      if (!_.isEmpty(data.Items[0])) {
+        return res.status(200).send(data.Items);
       } else {
         return res.status(404).send();
       }
@@ -73,12 +73,11 @@ router.get('/api/products/:GENDER', (req, res, next) => {
 });
 
 //Find products by category
-router.get('/api/products/:CATEGORY', (req, res, next) => {
+router.get('/api/products/category/:CATEGORY', function (req, res, next) {
   let category = req.params.CATEGORY;
   let product = 'PRODUCT';
   let params = {
     TableName: tableName,
-    ScanIndexForward: false,
     IndexName: indexName,
     KeyConditionExpression: 'SK = :SK',
     FilterExpression: 'CATEGORY = :CATEGORY',
@@ -97,8 +96,44 @@ router.get('/api/products/:CATEGORY', (req, res, next) => {
         status: err.statusCode
       });
     } else {
-      if (!_.isEmpty(data.Items)) {
-        return res.status(200).send(data.Items[0]);
+      if (!_.isEmpty(data.Items[0])) {
+        return res.status(200).send(data.Items);
+      } else {
+        return res.status(404).send();
+      }
+    }
+  });
+});
+
+//Find products by gender & category
+router.get('/api/products/gender/category/:GENDER/:CATEGORY', (req, res, next) => {
+  let gender = req.params.GENDER;
+  let category = req.params.CATEGORY;
+  let product = 'PRODUCT';
+  let params = {
+    TableName: tableName,
+    IndexName: indexName,
+    KeyConditionExpression: 'SK = :SK',
+    FilterExpression: 'GENDER = :GENDER',
+    FilterExpression: 'CATEGORY = :CATEGORY',
+    ExpressionAttributeValues: {
+      ':SK': product,
+      ':GENDER': gender,
+      ':CATEGORY': category
+    }
+
+  };
+
+  docClient.query(params, (err, data) => {
+    if (err) {
+      console.log(err);
+      return res.status(err.statusCode).send({
+        message: err.message,
+        status: err.statusCode
+      });
+    } else {
+      if (!_.isEmpty(data.Items[0])) {
+        return res.status(200).send(data.Items);
       } else {
         return res.status(404).send();
       }
