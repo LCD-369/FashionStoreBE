@@ -11,8 +11,8 @@ AWS.config.update({
 });
 const tableName = 'FashionrusStore';
 const indexName = 'SK-index';
+const secondIndexName = 'SK-GENDER-index';
 docClient = new AWS.DynamoDB.DocumentClient();
-
 
 //Find all products
 router.get('/api/products', (req, res, next) => {
@@ -25,7 +25,6 @@ router.get('/api/products', (req, res, next) => {
       ':SK': 'PRODUCT'
     }
   };
-
   docClient.query(params, (err, data) => {
     if (err) {
       console.log(err);
@@ -52,9 +51,7 @@ router.get('/api/products/gender/:GENDER', (req, res, next) => {
       ':SK': product,
       ':GENDER': gender
     }
-
   };
-
   docClient.query(params, (err, data) => {
     if (err) {
       console.log(err);
@@ -73,7 +70,7 @@ router.get('/api/products/gender/:GENDER', (req, res, next) => {
 });
 
 //Find products by category
-router.get('/api/products/category/:CATEGORY', function (req, res, next) {
+router.get('/api/products/category/:CATEGORY', function(req, res, next) {
   let category = req.params.CATEGORY;
   let product = 'PRODUCT';
   let params = {
@@ -85,9 +82,7 @@ router.get('/api/products/category/:CATEGORY', function (req, res, next) {
       ':SK': product,
       ':CATEGORY': category
     }
-
   };
-
   docClient.query(params, (err, data) => {
     if (err) {
       console.log(err);
@@ -112,18 +107,15 @@ router.get('/api/products/gender/category/:GENDER/:CATEGORY', (req, res, next) =
   let product = 'PRODUCT';
   let params = {
     TableName: tableName,
-    IndexName: indexName,
-    KeyConditionExpression: 'SK = :SK',
-    FilterExpression: 'GENDER = :GENDER',
+    IndexName: secondIndexName,
+    KeyConditionExpression: 'SK = :SK And GENDER = :GENDER',
     FilterExpression: 'CATEGORY = :CATEGORY',
     ExpressionAttributeValues: {
       ':SK': product,
       ':GENDER': gender,
       ':CATEGORY': category
     }
-
   };
-
   docClient.query(params, (err, data) => {
     if (err) {
       console.log(err);
