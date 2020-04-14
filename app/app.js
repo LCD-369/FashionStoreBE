@@ -1,21 +1,33 @@
 var createError = require('http-errors');
 var bodyParser = require('body-parser');
-var cors = require('cors');
+// var cors = require('cors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-// const compression = require('compression');
+
 
 // routers
 var productRouter = require('./routes/product-route');
-var memberRouter = require('./routes/member-route');
+var authRouter = require('./routes/auth-route');
 var paymentRouter = require('./routes/payment-route');
 var couponRouter = require('./routes/coupon-route');
 var orderRouter = require('./routes/order-route');
 
 var app = express();
-app.use(cors());
+// app.use(cors());
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PATCH, PUT, DELETE, OPTIONS"
+  );
+  next();
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,23 +37,18 @@ app.use(bodyParser.json());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(logger('dev'));
-// app.use(compression());
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(productRouter);
-app.use(memberRouter);
+app.use(authRouter);
 
 //CORS
-app.use(function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', '*');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-  next();
-});
+// app.use(function (req, res) {
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   res.setHeader('Access-Control-Allow-Methods', '*');
+//   res.setHeader('Access-Control-Allow-Headers', '*');
+//   next();
+// });
 
 
 // catch 404 and forward to error handler
