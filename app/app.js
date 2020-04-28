@@ -5,7 +5,6 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 
-
 // routers
 var productRouter = require('./routes/product-route');
 var authRouter = require('./routes/auth-route');
@@ -14,7 +13,6 @@ var couponRouter = require('./routes/coupon-route');
 var orderRouter = require('./routes/order-route');
 
 var app = express();
-// app.use(cors());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -35,12 +33,19 @@ app.set('view engine', 'jade');
 // parse application/json
 app.use(bodyParser.json());
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(logger('dev'));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(productRouter);
+app.use(orderRouter);
+app.use(paymentRouter);
 app.use(authRouter);
+app.use(couponRouter);
+
+// app.use(cors());
 
 //CORS
 // app.use(function (req, res) {

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/server.js",
-    "start:server": "nodemon server.js"
+    "start:server": "nodemon server.js",
+    "test": "mocha --recursive --exit"
   },
   "dependencies": {
     "@babel/cli": "^7.8.4",
@@ -33,6 +34,10 @@
     "fashionstorebe": "server.js"
   },
   "devDependencies": {
-    "nodemon": "^2.0.3"
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^7.1.1",
+    "nodemon": "^2.0.3",
+    "supertest": "^4.0.2"
   }
 }
