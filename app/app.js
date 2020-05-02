@@ -5,12 +5,14 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 
+
 // routers
 var productRouter = require('./routes/product-route');
 var authRouter = require('./routes/auth-route');
 var paymentRouter = require('./routes/payment-route');
 var couponRouter = require('./routes/coupon-route');
 var orderRouter = require('./routes/order-route');
+var memberRouter = require('./routes/member-route');
 
 var app = express();
 
@@ -44,7 +46,7 @@ app.use(orderRouter);
 app.use(paymentRouter);
 app.use(authRouter);
 app.use(couponRouter);
-
+app.use(memberRouter);
 // app.use(cors());
 
 //CORS

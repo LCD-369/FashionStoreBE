@@ -7,6 +7,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-1'});
 const tableName = 'FashionrusStore';
 const indexName = 'SK-index';
+const indexAuth = 'EMAIL-PASSWORD-index';
 docClient = new AWS.DynamoDB.DocumentClient();
 
 //Registers new user while encrypting password and verifying
@@ -34,22 +35,21 @@ router.post("/api/signup", (req, res, next) => {
 });
 
 //Login api
-router.post("/api/login", (req, res, next) => {
+router.post("/api/login", (req, res, then) => {
   let fetchedUser;
-  let email = req.body.email;
-  let member = 'MEMBER';
+  let email = req.body.EMAIL;
+  let tempPwd = req.body.PASSWORD;
+  let password = bcrypt.hashSync(tempPwd, 10);
   let params = {
-    TableName: tableName,
+    TableName: indexAuth,
     ScanIndexForward: false,
     IndexName: indexName,
-    KeyConditionExpression: 'SK = :SK',
-    FilterExpression: 'EMAIL = :EMAIL',
+    KeyConditionExpression: 'EMAIL = :EMAIL and PASSWORD = :PASSWORD',
     ExpressionAttributeValues: {
-      ':SK': member,
-      ':EMAIL': email
+      ':EMAIL': email,
+      ':PASSWORD': password
     }
   };
-
   docClient.query(params, (err, data) => {
     if (err) {
       console.log(err);
@@ -57,39 +57,34 @@ router.post("/api/login", (req, res, next) => {
         message: err.message,
         status: err.statusCode
       });
-    } else {
-      if (!_.isEmpty(data.Items)) {
-        fetchedUser = data.Items[0];
-        return bcrypt.compare(req.body.password, user.password);
-      } else {
-        return res.status(401).json({
-          message: "Auth failed"
-        });
-      }
     }
-  }).then(result => {
-    if (!result) {
+    if (!_.isEmpty(data.Items)) {
+      fetchedUser = data.Items[0];
+    } else {
       return res.status(401).json({
         message: "Auth failed"
       });
-    }
-    const token = jwt.sign({
-      email: fetchedUser.email,
-      userId: fetchedUser.username
-    }, process.env.JWT_KEY, {
-      expiresIn: "1h"
-    });
-    res.status(200).json({
-      token: token,
-      expiresIn: 3600,
-      userId: fetchedUser.username
-    });
-  }).catch(err => {
-    return res.status(401).json({
-      message: "Invalid authentication credentials!"
+    }}).next(result => {
+      if (!result) {
+        return res.status(401).json({message: "Auth failed"});
+      }
+      const token = jwt.sign({
+        email: fetchedUser.email,
+        userId: fetchedUser.username
+      }, process.env.JWT_KEY, {
+        expiresIn: "1h"
+      });
+      res.status(200).json({
+        token: token,
+        expiresIn: 3600,
+        userId: fetchedUser.username
+      });
+    }).catch(err => {
+      return res.status(401).json({
+        message: "Invalid authentication credentials!"
+      });
     });
   });
-});
 
 
 
