@@ -10,16 +10,18 @@ AWS.config.update({
   region: 'us-east-1'
 });
 const tableName = 'FashionrusStore';
-const indexName = 'SK-index';
+const indexName = 'SK-email-index';
 docClient = new AWS.DynamoDB.DocumentClient();
 
 //Add new order
 router.post('/api/order', (req, res, next) => {
-  let item = req.body.Item;
-  docClient.put({
+  let item = req.body;
+
+  var params = {
     TableName: tableName,
     Item: item
-  }, (err, data) => {
+  };
+  docClient.put(params, (err, data) => {
     if (err) {
       console.log(err);
       return res.status(err.statusCode).send({
@@ -32,21 +34,18 @@ router.post('/api/order', (req, res, next) => {
   });
 });
 
-//Find order by username
-router.get('/api/order/:USERNAME', (req, res, next) => {
-  let username = req.params.USERNAME;
+//Find order by email
+router.get('/api/order/:EMAIL', (req, res, next) => {
+  let email = req.params.EMAIL;
   let order = 'ORDER';
   let params = {
     TableName: tableName,
-    ScanIndexForward: false,
     IndexName: indexName,
-    KeyConditionExpression: 'SK = :SK',
-    FilterExpression: 'USERNAME = :USERNAME',
+    KeyConditionExpression: 'SK = :SK and email = :email',
     ExpressionAttributeValues: {
       ':SK': order,
-      ':USERNAME': username
+      ':email': email
     }
-
   };
 
   docClient.query(params, (err, data) => {
@@ -58,7 +57,7 @@ router.get('/api/order/:USERNAME', (req, res, next) => {
       });
     } else {
       if (!_.isEmpty(data.Items)) {
-        return res.status(200).send(data.Items[0]);
+        return res.status(200).send(data.Items);
       } else {
         return res.status(404).send();
       }
