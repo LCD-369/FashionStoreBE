@@ -10,11 +10,17 @@ if (process.env.NODE_ENV !== 'production') {
 
 var app = require('../app/app');
 var debug = require('debug')('fashionstorebe:server');
-var http = require('http');
+var https = require('https');
+var fs = require('fs');
 
 /**
  * Get port from environment and store in Express.
  */
+
+ var options = {
+    key: fs.readFileSync('../server-key.pem'),
+    cert: fs.readFileSync('../server-cert.pem'),
+};
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
@@ -23,7 +29,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
